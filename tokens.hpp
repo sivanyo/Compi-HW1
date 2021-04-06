@@ -1,5 +1,6 @@
-#ifndef TOKENS_HPP_ 
+#ifndef TOKENS_HPP_
 #define TOKENS_HPP_
+
 #include <cstdlib>
 
 enum tokentype {
@@ -39,9 +40,50 @@ enum tokentype {
     ERRORSTRING = 34,
     ERRORCHAR = 35,
 };
+
+const char *TOKEN_NAMES[] = {
+        "EMPTY",
+        "VOID",
+        "INT",
+        "BYTE",
+        "B",
+        "BOOL",
+        "AND",
+        "OR",
+        "NOT",
+        "TRUE",
+        "FALSE",
+        "RETURN",
+        "IF",
+        "ELSE",
+        "WHILE",
+        "BREAK",
+        "CONTINUE",
+        "SWITCH",
+        "CASE",
+        "DEFAULT",
+        "COLON",
+        "SC",
+        "COMMA",
+        "LPAREN",
+        "RPAREN",
+        "LBRACE",
+        "RBRACE",
+        "ASSIGN",
+        "RELOP",
+        "BINOP",
+        "COMMENT",
+        "ID",
+        "NUM",
+        "STRING",
+        "ERRORSTRING",
+        "ERRORCHAR"
+};
+
 extern int yylineno;
-extern char* yytext;
+extern char *yytext;
 extern size_t yyleng;
-extern int yylex(); 
+
+extern int yylex();
 
 #endif /* TOKENS_HPP_ */
