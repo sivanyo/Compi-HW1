@@ -1,3 +1,7 @@
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <iostream>
 #include "tokens.hpp"
 
 int main()

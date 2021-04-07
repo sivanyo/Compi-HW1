@@ -57,7 +57,7 @@ char convert_hex_to_ascii(const char c1, const char c2) {
 
 void showToken(const int token) {
     if (token == ERRORCHAR) {
-        printf("Error %s\n", yytext);
+        cout << "Error " << yytext << endl;
         exit(0);
     }
     if (token == ERRORSTRING) {
@@ -65,24 +65,24 @@ void showToken(const int token) {
         for (int i = 0; i < strLen; ++i) {
             // Handle newline in the middle of the string, or a '\' as the last character of the string
             if (yytext[i] == '\n' || yytext[i] == '\r' || (yytext[i] == '\\' && i == strLen - 1)) {
-                printf("Error unclosed string \n");
+                cout << "Error unclosed string" << endl;
                 exit(0);
             }
             // Handle an illegal escape character sequence
             if (yytext[i] == '\\') {
                 if (yytext[i + 1] != '0' || yytext[i + 1] != '"' || yytext[i + 1] != '\\' || yytext[i + 1] != 't' || yytext[i + 1] != 'x') {
-                    printf("Error undefined escape sequence %c\n", yytext[i + 1]);
+                    cout << "Error undefined escape sequence " << yytext[i+1] << endl;
                     exit(0);
                 }
                 // Check if the embedded hex character value is legal
                 if (yytext[i + 1] == 'x') {
                     if (i + 3 > strLen) {
                         // There is not enough room left in the string for a legal hex value
-                        printf("Error undefined escape sequence %c%c\n", yytext[i + 1], yytext[i + 2]);
+                        cout << "Error undefined escape sequence " << yytext[i+1] << yytext[i+2] << endl;
                         exit(0);
                     } else {
                         if (!check_legal_hex_pair(yytext[i + 2], yytext[i + 3])) {
-                            printf("Error undefined escape sequence %c%c%c\n", yytext[i + 1], yytext[i + 2], yytext[i + 3]);
+                            cout << "Error undefined escape sequence " << yytext[i+1] << yytext[i+2] << yytext[i+3] << endl;
                         }
                     }
                 }
@@ -91,7 +91,7 @@ void showToken(const int token) {
     }
     // \x7F
     if (token == COMMENT) {
-        printf("%d %s //\n", yylineno, TOKEN_NAMES[token]);
+        cout << yylineno << " " << TOKEN_NAMES[token] << " //" << endl;
     } else if (token == STRING) {
         int strLen = strlen(yytext);
         string output;
@@ -110,7 +110,7 @@ void showToken(const int token) {
                     // Need to replace the escape sequence with it's real escape sequence meaning
                     int result = replace_escape_sequence(yytext[i + 1]);
                     if (result == -1) {
-                        printf("Error undefined escape sequence %c\n", yytext[i + 1]);
+                        cout << "Error undefined escape sequence " << yytext[i+1] << endl;
                         exit(0);
                     } else {
                         output.push_back(result);
@@ -119,11 +119,10 @@ void showToken(const int token) {
                 }
             }
         }
-        printf("%d %s ", yylineno, TOKEN_NAMES[token]);
-        std::cout << output << std::endl;
+        cout << yylineno << " " << TOKEN_NAMES[token] << " " << output << endl;
     } else {
         // this prints out any other token that wasn't matched before
-        printf("%d %s %s\n", yylineno, TOKEN_NAMES[token], yytext);
+        cout << yylineno << " " << TOKEN_NAMES[token] << " " << yytext << endl;
     }
 }
 
