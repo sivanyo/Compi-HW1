@@ -7,4 +7,5 @@ include_directories(.)
 
 add_executable(hw1
         part_a.cpp
-        tokens.hpp)
+        tokens.hpp
+        lex.yy.c)

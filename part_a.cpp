@@ -105,6 +105,7 @@ void showToken(const int token) {
                 if (yytext[i + 1] == 'x') {
                     // Need to convert an embedded hex value to it's real ascii character
                     output.push_back(convert_hex_to_ascii(yytext[i + 2], yytext[i + 3]));
+                    i += 3;
                 } else {
                     // Need to replace the escape sequence with it's real escape sequence meaning
                     int result = replace_escape_sequence(yytext[i + 1]);
@@ -113,6 +114,7 @@ void showToken(const int token) {
                         exit(0);
                     } else {
                         output.push_back(result);
+                        i += 1;
                     }
                 }
             }

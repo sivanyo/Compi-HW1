@@ -1,8 +1,6 @@
 #ifndef TOKENS_HPP_
 #define TOKENS_HPP_
 
-#include <cstdlib>
-
 enum tokentype {
     VOID = 1,
     INT = 2,
@@ -41,7 +39,7 @@ enum tokentype {
     ERRORCHAR = 35,
 };
 
-const char *TOKEN_NAMES[] = {
+static const char *TOKEN_NAMES[] = {
         "EMPTY",
         "VOID",
         "INT",

@@ -8,7 +8,8 @@
 %option noyywrap
 digit   ([1-9])
 letter  ([a-zA-Z])
-whitespace  ([\r\n\t])
+whitespace  ([\r\n\t ])
+%x          STRINGS
 
 %%
 
@@ -41,9 +42,10 @@ default                                                                         
 (=)                                                                                                                                         return ASSIGN;
 ((<|>|=|!)=)|>|<                                                                                                                            return RELOP;
 (\+|\-|\*|\/)                                                                                                                               return BINOP;
-\/\/([\x00-\x09\x0b-\x0c\0xe-\x7f])*                                                                                                        return COMMENT;
+\/\/([\x00-\x09\x0b-\x0c\x0e-\x7f])*                                                                                                        return COMMENT;
 {letter}({letter}|{digit}|0)*                                                                                                               return ID;
-{digit}({digit}|0)*                                                                                                                         return NUM;
+({digit}({digit}|0)*)|0                                                                                                                     return NUM;
+{whitespace}                                                                                                                                ;
 (\")                                                                                                                                        BEGIN(STRINGS);
 <STRINGS><<EOF>>                                                                                                                            return ERRORSTRING;
 <STRINGS>([\x00-\x09\x0b-\x0c\x0e-\x21\x23-\x5b\x5d-\x7f]|(\\)(\\)|(\\)(\")|(\\)(n)|(\\)(r)|(\\)(t)|(\\)(0)|((\\)x[0-9|A-F][0-9|A-F]))*(\") {BEGIN(INITIAL); return STRING;}
