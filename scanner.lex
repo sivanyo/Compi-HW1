@@ -10,12 +10,7 @@ digit   ([1-9])
 letter  ([a-zA-Z])
 whitespace  ([\r\n\t])
 
-// comment for <STRINGS><<EOF>> If we reach a string like \"EOF, this is a bad string
-// comment for normal STRINGS parsing Try to match a complete string text all the way to the ending \", match \\,\",\n,\r,\t,\0,\x separately
-// comment for bad string ending with \" Try to match 1 or more instances of \" which indicate a string of the format "\" which is illegal
-//<STRINGS>([^(\")*((\")?)
-
-%% // start of rules section
+%%
 
 void                                                                                                                                        return VOID;
 int                                                                                                                                         return INT;
