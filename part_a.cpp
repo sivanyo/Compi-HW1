@@ -67,6 +67,11 @@ void showToken(const int token) {
         int strLen = strlen(yytext);
         //cout << "String is: " << yytext << " and strlen is: " << strLen << endl;
         for (int i = 0; i < strLen; ++i) {
+//            if (yytext[i] == '\\' && i == strLen - 1) {
+//                cout << "Error unclosed string" << endl;
+//                exit(0);
+//            }
+            // FIXME: after a re-read after the staff instructions, this block is probably unnecessary
             // Handle newline in the middle of the string, or a '\' as the last character of the string
             if (yytext[i] == '\n' || yytext[i] == '\r' || (yytext[i] == '\\' && i == strLen - 1)) {
                 cout << "Error unclosed string" << endl;
@@ -74,7 +79,8 @@ void showToken(const int token) {
             }
             // Handle an illegal escape character sequence
             if (yytext[i] == '\\') {
-                if (yytext[i + 1] != '0' && yytext[i + 1] != '"' && yytext[i + 1] != '\\' && yytext[i + 1] != 't' && yytext[i + 1] != 'x') {
+                if (yytext[i + 1] != '0' && yytext[i + 1] != '"' && yytext[i + 1] != '\\' && yytext[i + 1] != 't' && yytext[i + 1] != 'x' &&
+                    yytext[i + 1] != 'n' && yytext[i + 1] != 'r') {
                     if (!undefEscape) {
                         undefEscape = true;
                         undef.append("Error undefined escape sequence ");
