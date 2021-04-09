@@ -89,7 +89,7 @@ void showToken(const int token) {
             }
         }
     }
-    // \x7F
+
     if (token == COMMENT) {
         cout << yylineno << " " << TOKEN_NAMES[token] << " //" << endl;
     } else if (token == STRING) {
