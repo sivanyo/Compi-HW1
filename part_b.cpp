@@ -67,5 +67,9 @@ int main() {
             continue;
         }
     }
+    if (!braces.empty()) {
+        cout << "Error: Bad Expression" << endl;
+        exit(0);
+    }
     return 0;
 }

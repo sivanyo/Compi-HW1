@@ -70,7 +70,6 @@ void showToken(const int token) {
     } else if (token == STRING) {
         int strLen = strlen(yytext);
         bool keepWritingOutput = true;
-        bool undefEscape = false;
         string undef = "";
         string output;
         for (int i = 0; i < strLen - 1; ++i) {
@@ -84,47 +83,47 @@ void showToken(const int token) {
                 // figure out what is the escape sequence - n,0,t,r,",\,x
                 if (yytext[i + 1] != '0' && yytext[i + 1] != '"' && yytext[i + 1] != '\\' && yytext[i + 1] != 't' && yytext[i + 1] != 'x' &&
                     yytext[i + 1] != 'n' && yytext[i + 1] != 'r') {
-                    if (!undefEscape) {
-                        undefEscape = true;
-                        undef.append("Error undefined escape sequence ");
-                        undef.push_back(yytext[i + 1]);
-                    }
+                    undef.append("Error undefined escape sequence ");
+                    undef.push_back(yytext[i + 1]);
+                    cout << undef << endl;
+                    exit(0);
                 }
                 // Check if the embedded hex character value is legal
                 if (yytext[i + 1] == 'x') {
                     if (i + 3 > strLen - 1) {
                         if (strLen - 1 - i == 2) {
                             // There is room for \xA
-                            if (!undefEscape) {
-                                undefEscape = true;
-                                undef.append("Error undefined escape sequence ");
-                                if (yytext[i + 2] != '"') {
-                                    undef.push_back(yytext[i + 1]);
-                                    undef.push_back(yytext[i + 2]);
-                                } else {
-                                    undef.push_back(yytext[i + 1]);
-                                }
+                            undef.append("Error undefined escape sequence ");
+                            if (yytext[i + 2] != '"') {
+                                undef.push_back(yytext[i + 1]);
+                                undef.push_back(yytext[i + 2]);
+                                cout << undef << endl;
+                                exit(0);
+                            } else {
+                                undef.push_back(yytext[i + 1]);
+                                cout << undef << endl;
+                                exit(0);
                             }
                         } else if (strLen - 1 - i == 1) {
                             // There is room for \x
-                            if (!undefEscape) {
-                                undefEscape = true;
-                                undef.append("Error undefined escape sequence ");
-                                undef.push_back(yytext[i + 1]);
-                            }
+                            undef.append("Error undefined escape sequence ");
+                            undef.push_back(yytext[i + 1]);
+                            cout << undef << endl;
+                            exit(0);
                         }
                     } else if (!check_legal_hex_pair(yytext[i + 2], yytext[i + 3])) {
-                        if (!undefEscape) {
-                            undefEscape = true;
-                            undef.append("Error undefined escape sequence ");
-                            if (yytext[i + 3] == '"') {
-                                undef.push_back(yytext[i + 1]);
-                                undef.push_back(yytext[i + 2]);
-                            } else {
-                                undef.push_back(yytext[i + 1]);
-                                undef.push_back(yytext[i + 2]);
-                                undef.push_back(yytext[i + 3]);
-                            }
+                        undef.append("Error undefined escape sequence ");
+                        if (yytext[i + 3] == '"') {
+                            undef.push_back(yytext[i + 1]);
+                            undef.push_back(yytext[i + 2]);
+                            cout << undef << endl;
+                            exit(0);
+                        } else {
+                            undef.push_back(yytext[i + 1]);
+                            undef.push_back(yytext[i + 2]);
+                            undef.push_back(yytext[i + 3]);
+                            cout << undef << endl;
+                            exit(0);
                         }
                     } else {
                         // Need to convert an embedded hex value to it's real ascii character
@@ -153,10 +152,6 @@ void showToken(const int token) {
                     }
                 }
             }
-        }
-        if (undefEscape) {
-            cout << undef << endl;
-            exit(0);
         }
         cout << yylineno << " " << TOKEN_NAMES[token] << " " << output << endl;
     } else {
