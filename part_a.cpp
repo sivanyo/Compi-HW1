@@ -12,7 +12,7 @@ using std::endl;
 extern int yylex();
 
 bool check_legal_hex_pair(const char c1, const char c2) {
-    if (c1 >= '0' && c1 <= '7' && (c2 >= '0' && c2 <= '9' || c2 >= 'A' && c2 <= 'F')) {
+    if (c1 >= '0' && c1 <= '7' && (c2 >= '0' && c2 <= '9' || c2 >= 'A' && c2 <= 'F' || c2 >= 'a' && c2 <= 'f')) {
         return true;
     }
     return false;
@@ -64,25 +64,24 @@ void showToken(const int token) {
         cout << "Error unclosed string" << endl;
         exit(0);
     }
-    if (token == ERRORSTRING) {
+
+    if (token == COMMENT) {
+        cout << yylineno << " " << TOKEN_NAMES[token] << " //" << endl;
+    } else if (token == STRING) {
+        int strLen = strlen(yytext);
+        bool keepWritingOutput = true;
         bool undefEscape = false;
         string undef = "";
-        // Strlen returns the length of the string up to the last character -> if the string is hello, strlen is 5
-        int strLen = strlen(yytext);
-        //cout << "String is: " << yytext << " and strlen is: " << strLen << endl;
-        for (int i = 0; i < strLen; ++i) {
-//            if (yytext[i] == '\\' && i == strLen - 1) {
-//                cout << "Error unclosed string" << endl;
-//                exit(0);
-//            }
-            // FIXME: after a re-read after the staff instructions, this block is probably unnecessary
-            // Handle newline in the middle of the string, or a '\' as the last character of the string
-            if ((yytext[i] == '\\' && i == strLen - 1)) {
-                cout << "Error unclosed string" << endl;
-                exit(0);
-            }
-            // Handle an illegal escape character sequence
-            if (yytext[i] == '\\') {
+        string output;
+        for (int i = 0; i < strLen - 1; ++i) {
+            if (yytext[i] != '\\') {
+                // This is a normal character which requires no special handling
+                if (keepWritingOutput) {
+                    output.push_back(yytext[i]);
+                }
+            } else {
+                // this is part of an escape sequence, so we need to replace the escape sequence with the correct value in the output string
+                // figure out what is the escape sequence - n,0,t,r,",\,x
                 if (yytext[i + 1] != '0' && yytext[i + 1] != '"' && yytext[i + 1] != '\\' && yytext[i + 1] != 't' && yytext[i + 1] != 'x' &&
                     yytext[i + 1] != 'n' && yytext[i + 1] != 'r') {
                     if (!undefEscape) {
@@ -99,8 +98,12 @@ void showToken(const int token) {
                             if (!undefEscape) {
                                 undefEscape = true;
                                 undef.append("Error undefined escape sequence ");
-                                undef.push_back(yytext[i + 1]);
-                                undef.push_back(yytext[i + 2]);
+                                if (yytext[i + 2] != '"') {
+                                    undef.push_back(yytext[i + 1]);
+                                    undef.push_back(yytext[i + 2]);
+                                } else {
+                                    undef.push_back(yytext[i + 1]);
+                                }
                             }
                         } else if (strLen - 1 - i == 1) {
                             // There is room for \x
@@ -110,46 +113,25 @@ void showToken(const int token) {
                                 undef.push_back(yytext[i + 1]);
                             }
                         }
-                    } else {
-                        if (!check_legal_hex_pair(yytext[i + 2], yytext[i + 3])) {
-                            if (!undefEscape) {
-                                undefEscape = true;
-                                undef.append("Error undefined escape sequence ");
+                    } else if (!check_legal_hex_pair(yytext[i + 2], yytext[i + 3])) {
+                        if (!undefEscape) {
+                            undefEscape = true;
+                            undef.append("Error undefined escape sequence ");
+                            if (yytext[i + 3] == '"') {
+                                undef.push_back(yytext[i + 1]);
+                                undef.push_back(yytext[i + 2]);
+                            } else {
                                 undef.push_back(yytext[i + 1]);
                                 undef.push_back(yytext[i + 2]);
                                 undef.push_back(yytext[i + 3]);
                             }
                         }
-                    }
-                }
-            }
-        }
-        if (undefEscape) {
-            cout << undef << endl;
-            exit(0);
-        }
-    }
-
-    if (token == COMMENT) {
-        cout << yylineno << " " << TOKEN_NAMES[token] << " //" << endl;
-    } else if (token == STRING) {
-        int strLen = strlen(yytext);
-        bool keepWritingOutput = true;
-        string output;
-        for (int i = 0; i < strLen - 1; ++i) {
-            if (yytext[i] != '\\') {
-                // This is a normal character which requires no special handling
-                if (keepWritingOutput) {
-                    output.push_back(yytext[i]);
-                }
-            } else {
-                // this is part of an escape sequence, so we need to replace the escape sequence with the correct value in the output string
-                // figure out what is the escape sequence - n,0,t,r,",\,x
-                if (yytext[i + 1] == 'x') {
-                    // Need to convert an embedded hex value to it's real ascii character
-                    if (keepWritingOutput) {
-                        output.push_back(convert_hex_to_ascii(yytext[i + 2], yytext[i + 3]));
-                        i += 3;
+                    } else {
+                        // Need to convert an embedded hex value to it's real ascii character
+                        if (keepWritingOutput) {
+                            output.push_back(convert_hex_to_ascii(yytext[i + 2], yytext[i + 3]));
+                            i += 3;
+                        }
                     }
                 } else {
                     // Need to replace the escape sequence with it's real escape sequence meaning
@@ -171,6 +153,10 @@ void showToken(const int token) {
                     }
                 }
             }
+        }
+        if (undefEscape) {
+            cout << undef << endl;
+            exit(0);
         }
         cout << yylineno << " " << TOKEN_NAMES[token] << " " << output << endl;
     } else {

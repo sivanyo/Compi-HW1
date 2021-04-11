@@ -82,6 +82,8 @@ static const char *TOKEN_NAMES[] = {
 
 extern int yylineno;
 extern char *yytext;
+// TODO: revert this to size_t when we figure out what the hell is the staff doing on the server
+// FIXME: we can probably delete it anyway
 extern int yyleng;
 
 extern int yylex();

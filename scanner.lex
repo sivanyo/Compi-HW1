@@ -10,6 +10,7 @@ digit   ([1-9])
 letter  ([a-zA-Z])
 whitespace  ([\r\n\t ])
 hexchar ([0-9a-fA-F])
+escape  (\\n|\\r|\\t|\\0|\\x{hexchar}{2}|\\.)
 %x          STRINGS_TERM
 
 %%
@@ -48,9 +49,9 @@ default                                                                         
 ({digit}({digit}|0)*)|0                                                                                                                             return NUM;
 {whitespace}                                                                                                                                        ;
 (\")                                                                                                                                                BEGIN(STRINGS_TERM);
-<STRINGS_TERM><<EOF>>                                                                                                                               return UNCLOSEDSTRING;
-<STRINGS_TERM>([\x00-\x09\x0b-\x0c\x0e-\x21\x23-\x5b\x5d-\x7f]|(\\)(\\)|(\\)(\")|(\\)(n)|(\\)(r)|(\\)(t)|(\\)(0)|((\\)x[0-7][0-9|A-F|a-f]))*(\")    {BEGIN(INITIAL); return STRING;}
+<STRINGS_TERM>([\x00-\x09\x0b-\x0c\x0e-\x21\x23-\x5b\x5d-\x7f]|{escape})*(\")                                                                       {BEGIN(INITIAL); return STRING;}
 <STRINGS_TERM>([^(\")]+)                                                                                                                            return UNCLOSEDSTRING;
+<STRINGS_TERM><<EOF>>                                                                                                                               return UNCLOSEDSTRING;
 .                                                                                                                                                   return ERRORCHAR;
 
 %%
