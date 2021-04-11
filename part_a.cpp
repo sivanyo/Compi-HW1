@@ -60,6 +60,10 @@ void showToken(const int token) {
         cout << "Error " << yytext << endl;
         exit(0);
     }
+    if (token == UNCLOSEDSTRING) {
+        cout << "Error unclosed string" << endl;
+        exit(0);
+    }
     if (token == ERRORSTRING) {
         bool undefEscape = false;
         string undef = "";
@@ -73,7 +77,7 @@ void showToken(const int token) {
 //            }
             // FIXME: after a re-read after the staff instructions, this block is probably unnecessary
             // Handle newline in the middle of the string, or a '\' as the last character of the string
-            if (yytext[i] == '\n' || yytext[i] == '\r' || (yytext[i] == '\\' && i == strLen - 1)) {
+            if ((yytext[i] == '\\' && i == strLen - 1)) {
                 cout << "Error unclosed string" << endl;
                 exit(0);
             }
@@ -86,21 +90,26 @@ void showToken(const int token) {
                         undef.append("Error undefined escape sequence ");
                         undef.push_back(yytext[i + 1]);
                     }
-//                    cout << "Error undefined escape sequence " << yytext[i+1] << endl;
-//                    exit(0);
                 }
                 // Check if the embedded hex character value is legal
                 if (yytext[i + 1] == 'x') {
                     if (i + 3 > strLen - 1) {
-                        // There is not enough room left in the string for a legal hex value
-                        if (!undefEscape) {
-                            undefEscape = true;
-                            undef.append("Error undefined escape sequence ");
-                            undef.push_back(yytext[i + 1]);
-                            undef.push_back(yytext[i + 2]);
+                        if (strLen - 1 - i == 2) {
+                            // There is room for \xA
+                            if (!undefEscape) {
+                                undefEscape = true;
+                                undef.append("Error undefined escape sequence ");
+                                undef.push_back(yytext[i + 1]);
+                                undef.push_back(yytext[i + 2]);
+                            }
+                        } else if (strLen - 1 - i == 1) {
+                            // There is room for \x
+                            if (!undefEscape) {
+                                undefEscape = true;
+                                undef.append("Error undefined escape sequence ");
+                                undef.push_back(yytext[i + 1]);
+                            }
                         }
-//                        cout << "Error undefined escape sequence " << yytext[i+1] << yytext[i+2] << endl;
-//                        exit(0);
                     } else {
                         if (!check_legal_hex_pair(yytext[i + 2], yytext[i + 3])) {
                             if (!undefEscape) {
@@ -110,8 +119,6 @@ void showToken(const int token) {
                                 undef.push_back(yytext[i + 2]);
                                 undef.push_back(yytext[i + 3]);
                             }
-//                            cout << "Error undefined escape sequence " << yytext[i+1] << yytext[i+2] << yytext[i+3] << endl;
-//                            exit(0);
                         }
                     }
                 }
@@ -127,27 +134,40 @@ void showToken(const int token) {
         cout << yylineno << " " << TOKEN_NAMES[token] << " //" << endl;
     } else if (token == STRING) {
         int strLen = strlen(yytext);
+        bool keepWritingOutput = true;
         string output;
         for (int i = 0; i < strLen - 1; ++i) {
             if (yytext[i] != '\\') {
                 // This is a normal character which requires no special handling
-                output.push_back(yytext[i]);
+                if (keepWritingOutput) {
+                    output.push_back(yytext[i]);
+                }
             } else {
                 // this is part of an escape sequence, so we need to replace the escape sequence with the correct value in the output string
                 // figure out what is the escape sequence - n,0,t,r,",\,x
                 if (yytext[i + 1] == 'x') {
                     // Need to convert an embedded hex value to it's real ascii character
-                    output.push_back(convert_hex_to_ascii(yytext[i + 2], yytext[i + 3]));
-                    i += 3;
+                    if (keepWritingOutput) {
+                        output.push_back(convert_hex_to_ascii(yytext[i + 2], yytext[i + 3]));
+                        i += 3;
+                    }
                 } else {
                     // Need to replace the escape sequence with it's real escape sequence meaning
                     int result = replace_escape_sequence(yytext[i + 1]);
                     if (result == -1) {
                         cout << "Error undefined escape sequence " << yytext[i + 1] << endl;
                         exit(0);
+                    } else if (result == 0) {
+                        if (keepWritingOutput) {
+                            // We encountered a \0, so the string ends here.
+                            keepWritingOutput = false;
+                            output.push_back(result);
+                        }
                     } else {
-                        output.push_back(result);
-                        i += 1;
+                        if (keepWritingOutput) {
+                            output.push_back(result);
+                            i += 1;
+                        }
                     }
                 }
             }

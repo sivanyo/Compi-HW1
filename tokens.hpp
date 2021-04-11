@@ -36,7 +36,8 @@ enum tokentype {
     NUM = 32,
     STRING = 33,
     ERRORSTRING = 34,
-    ERRORCHAR = 35,
+    UNCLOSEDSTRING = 35,
+    ERRORCHAR = 36,
 };
 
 static const char *TOKEN_NAMES[] = {
@@ -75,12 +76,13 @@ static const char *TOKEN_NAMES[] = {
         "NUM",
         "STRING",
         "ERRORSTRING",
+        "UNCLOSEDSTRING",
         "ERRORCHAR"
 };
 
 extern int yylineno;
 extern char *yytext;
-extern size_t yyleng;
+extern int yyleng;
 
 extern int yylex();
 
