@@ -56,11 +56,14 @@ char convert_hex_to_ascii(const char c1, const char c2) {
 }
 
 void showToken(const int token) {
+//    cout << "Token num is: " << token << endl;
+//    cout << "TEST IS: " << yytext << endl;
     if (token == ERRORCHAR) {
         cout << "Error " << yytext << endl;
         exit(0);
     }
     if (token == UNCLOSEDSTRING) {
+//        cout << "HERE" << endl;
         cout << "Error unclosed string" << endl;
         exit(0);
     }
