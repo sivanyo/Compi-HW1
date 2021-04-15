@@ -50,7 +50,7 @@ default                                                                         
 {whitespace}                                                                                                                                        ;
 (\")                                                                                                                                                BEGIN(STRINGS_TERM);
 <STRINGS_TERM>([\x00-\x09\x0b-\x0c\x0e-\x21\x23-\x5b\x5d-\x7f]|{escape})*(\")                                                                       {BEGIN(INITIAL); return STRING;}
-<STRINGS_TERM>([^(\")]+)                                                                                                                            return UNCLOSEDSTRING;
+<STRINGS_TERM>([^\"]+)                                                                                                                            return UNCLOSEDSTRING;
 <STRINGS_TERM><<EOF>>                                                                                                                               return UNCLOSEDSTRING;
 .                                                                                                                                                   return ERRORCHAR;
 

@@ -27,7 +27,7 @@ int replace_escape_sequence(const char c) {
         case 'r':
             return '\r';
         case '0':
-            return '\0';
+            return 0;
         case '"':
             return '"';
         case '\\':
@@ -131,7 +131,10 @@ void showToken(const int token) {
                     } else {
                         // Need to convert an embedded hex value to it's real ascii character
                         if (keepWritingOutput) {
-                            output.push_back(convert_hex_to_ascii(yytext[i + 2], yytext[i + 3]));
+                            char res = convert_hex_to_ascii(yytext[i + 2], yytext[i + 3]);
+                            if (res != 0) {
+                                output.push_back(res);
+                            }
                             i += 3;
                         }
                     }
@@ -145,7 +148,8 @@ void showToken(const int token) {
                         if (keepWritingOutput) {
                             // We encountered a \0, so the string ends here.
                             keepWritingOutput = false;
-                            output.push_back(result);
+//                            output.push_back(result);
+                            i += 1;
                         }
                     } else {
                         if (keepWritingOutput) {
