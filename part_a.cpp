@@ -134,6 +134,8 @@ void showToken(const int token) {
                             char res = convert_hex_to_ascii(yytext[i + 2], yytext[i + 3]);
                             if (res != 0) {
                                 output.push_back(res);
+                            } else {
+                                keepWritingOutput = false;
                             }
                             i += 3;
                         }
